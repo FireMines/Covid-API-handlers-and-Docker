@@ -27,8 +27,10 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"covidAss2"
+	consts "covidAss2"
 	cases "covidAss2/cases"
 	handler "covidAss2/handler"
 	status "covidAss2/status"
@@ -160,6 +162,9 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	//Start := time.Now()
+	consts.Start = time.Now()
+
 	// Firebase initialisation
 	ctx = context.Background()
 
@@ -201,10 +206,10 @@ func main() {
 	http.HandleFunc("/messages", handleMessage) // Be forgiving in case people for get the trailing /
 	http.HandleFunc("/messages/", handleMessage)
 	http.HandleFunc(covidAss2.COVIDCASES, cases.CovidInfoHandler)
-	//http.HandleFunc(covidAss2.COVIDPOLICY, cases.CovidInfoHandler)
+	//http.HandleFunc(covidAss2.COVIDPOLICY, policy.PolicyHandler)
 	http.HandleFunc(covidAss2.COVIDSTATUS, status.StatusHandler)
-	http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, handler.NeighbourUniHandler)
-	//http.HandleFunc(covidAss2.DEFAULT_PATH, handler.EmptyHandler)
+	//http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, notifications.NotificationHandler)
+	http.HandleFunc(covidAss2.DEFAULT_PATH, handler.EmptyHandler)
 
 	log.Printf("Listening on %s ...\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {

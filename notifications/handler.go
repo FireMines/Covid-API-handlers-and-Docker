@@ -1,4 +1,4 @@
-package handler
+package notifications
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 /*
 Entry point handler for Location information
 */
-func NeighbourUniHandler(w http.ResponseWriter, r *http.Request) {
+func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:

@@ -28,7 +28,7 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 
 	// Issue request
-	res, err := client.Get(consts.COVIDTRACKER)
+	res, err := client.Get(consts.COVIDTRACKERCHECK)
 	if err != nil {
 		fmt.Println("Error in response:", err.Error())
 	}
@@ -39,14 +39,14 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t := time.Now()
-	elapsed := t.Sub(consts.Start)
+	Elapsed := t.Sub(consts.Start)
 
 	statusInfo := map[string]interface{}{
 		"cases_api":  res.StatusCode,
-		"policy_api": res2.StatusCode, // Getting 400 Error, fix this before delivery
+		"policy_api": res2.StatusCode, // Getting 400 Error, seems like this is okey(??)
 		//"webhooks":		,
-		"version": res.TLS.Version,
-		"uptime":  elapsed.Seconds(),
+		"version": consts.VERSIONNUMBER,
+		"uptime":  Elapsed.Seconds(),
 	}
 
 	w.Header().Add("content-type", "application/json")

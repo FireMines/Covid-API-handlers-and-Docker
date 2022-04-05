@@ -29,52 +29,65 @@ func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
+	r.Header.Add("content-type", "application/json")
 
 	// Get country matching the name in the URL
-	countryInfo := getCovidCasesPerCountry(urlLastVal, "3/10/2020")
+	countryInfo := getCovidCasesPerCountry(urlLastVal)
 
 	// Marshal them and write to Writer
-	writeUnis, _ := json.Marshal(countryInfo)
+	writeUnis, err := json.Marshal(countryInfo)
+	if err != nil {
+		fmt.Println("Error in response:", err.Error())
+		http.Error(w, "Error in response:", http.StatusInternalServerError)
+	}
+
 	w.Header().Add("content-type", "application/json")
 	w.Write(writeUnis)
 
 }
 
-func getCovidCasesPerCountry(countryName string, date string) []consts.Results {
-	var country []consts.Results
-
-	//url := COVIDGRAPHQL
-
-	graphqlClient := graphql.NewClient(consts.RESOURCE_ROOT_PATH + consts.COVIDCASES)
+func getCovidCasesPerCountry(countryName string) consts.Results {
+	var country consts.Results
+	graphqlClient := graphql.NewClient(consts.COVIDGRAPHQL)
 	graphqlRequest := graphql.NewRequest(`
 	query {
-		# time series data
-		results (countries: [` + countryName + ` ], date: { lt: ` + date + ` }) {
-		  country {
-			name
-		  }
-		  date
-		  confirmed
-		  deaths
-		  recovered
-		  growthRate
-		}
-	  
 		# by country
-		country(name: "Sweden") {
+		country(name:"` + countryName + `") {
 		  name
 		  mostRecent {
 			date(format: "yyyy-MM-dd")
 			confirmed
+			recovered
+			deaths
+			growthRate
 		  }
 		}
 	  } 
 	`)
-	var graphqlResponse interface{}
+	var graphqlResponse map[string]interface{}
 	if err := graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse); err != nil {
 		panic(err)
+		//fmt.Println("Error in response:", err.Error())
+		//http.Error(w, "Error in response:", http.StatusInternalServerError)
 	}
+
 	fmt.Println(graphqlResponse)
 
+	country = storeData(graphqlResponse)
+
 	return country
+}
+
+func storeData(data map[string]interface{}) consts.Results {
+	data = (data["country"].(map[string]interface{}))
+	allData := data["mostRecent"].(map[string]interface{})
+
+	return consts.Results{
+		data["name"].(string),
+		allData["date"].(string),
+		allData["confirmed"].(float64),
+		allData["deaths"].(float64),
+		allData["recovered"].(float64),
+		allData["growthRate"].(float64),
+	}
 }
