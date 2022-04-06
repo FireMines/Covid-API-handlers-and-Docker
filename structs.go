@@ -10,12 +10,12 @@ type Results struct {
 }
 
 type PolicyResults struct {
-	Date             string `json:"date"`
-	CountryCode      string `json:"country_code"`
-	Confirmed        int    `json:"confirmed"`
-	Deaths           int    `json:"deaths"`
-	StringencyActual int    `json:"stringency_actual"`
-	Stringency       int    `json:"stringency"`
+	Date             string  `json:"date_value"`
+	CountryCode      string  `json:"country_code"`
+	Confirmed        float64 `json:"confirmed"`
+	Deaths           float64 `json:"deaths"`
+	StringencyActual float64 `json:"stringency_actual"`
+	Stringency       float64 `json:"stringency"`
 
 	/* 	TypeCode           string `json:"policy_type_code"`
 	   	TypeDisplay        string `json:"policy_type_display"`

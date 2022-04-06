@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 )
 
 /*
@@ -29,31 +30,38 @@ func PolicyHandler(w http.ResponseWriter, r *http.Request) {
 func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Country you are searching for
-	WantCountry := strings.ReplaceAll(path.Base(path.Dir(r.URL.Path)), " ", "%20") // Gets the first output from path
-	/* 	WantDate := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")              // Gets the second output from path
+	WantCountry := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20") // Gets the first output from path
+	//WantDate := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")    // Gets the second output from path
 
-	   	scope, err := strconv.Atoi(r.URL.Query().Get("scope")) // Gets the optional limit put on how many to output
-	   	noScopeSet := false
-	   	var dateNow string
-	   	if err != nil {
-	   		noScopeSet = true
-	   		currentTime := time.Now()
-	   		dateNow = currentTime.Format("2022-03-01")
-	   	} */
-
-	var cntry consts.PolicyResults
-	resp, err := http.Get(consts.COVIDTRACKER + WantCountry)
-	err = json.NewDecoder(resp.Body).Decode(&cntry)
-	if err != nil {
-		http.Error(w, "God damn it big penis man, you goofed up. Now back that badonkadonk up and fix it", http.StatusBadRequest)
-		fmt.Println("Decoding: " + err.Error())
-		//return
+	scope := r.URL.Query().Get("scope") // Gets the optional limit put on how many to output
+	if scope == "" {
+		currentTime := time.Now()
+		scope = currentTime.Format("2006-01-02")
 	}
-	if cntry.Date == "" || cntry.CountryCode == "" || cntry.Confirmed == 0 || cntry.Deaths == 0 || cntry.StringencyActual == 0 || cntry.Stringency == 0 {
-		http.Error(w, "Input did not contain complete policy specification. Recheck posted policy information and resubmit.", http.StatusBadRequest)
-		fmt.Println("Empty ID on country:", cntry)
+
+	fmt.Println(consts.COVIDTRACKER + WantCountry + "/" + scope)
+	resp, err := http.Get(consts.COVIDTRACKER + WantCountry + "/" + scope)
+	if err != nil {
+		http.Error(w, "1God damn it, you goofed up. Now back that badonkadonk up and fix it", http.StatusBadRequest)
+		fmt.Println("Decoding1: " + err.Error())
 		return
 	}
+
+	tester := map[string]interface{}{}
+	err = json.NewDecoder(resp.Body).Decode(&tester)
+	if err != nil {
+		http.Error(w, "2God damn it, you goofed up. Now back that badonkadonk up and fix it", http.StatusBadRequest)
+		fmt.Println("Decoding2: " + err.Error())
+		return
+	}
+
+	cntry := storePolicyData(tester["stringencyData"].(map[string]interface{}))
+	fmt.Println("Hei1")
+	/* 	if cntry.Date == "" || cntry.CountryCode == "" || cntry.Confirmed == 0 || cntry.Deaths == 0 || cntry.StringencyActual == 0 || cntry.Stringency == 0 {
+		http.Error(w, "Input did not contain complete policy specification. Recheck posted policy information and resubmit.", http.StatusBadRequest)
+		fmt.Println("Empty ID on country:", cntry)
+
+	} */
 
 	defer resp.Body.Close()
 
@@ -67,73 +75,30 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Explicit specification of return status code --> will default to 200 if not provided.
 	http.Error(w, "", http.StatusOK)
 
-	//err = json.Unmarshal()
-	//defer close()
+}
 
-	/*
-		// Step 1:
-		// One country (ex. Norway) => Bordering country alphas (ex. [FIN, RUS, SWE])
-		var cntry []consts.Results
-		allInfo, _ := http.Get(consts.COVIDTRACKER + WantCountry)
-		countrybody, _ := io.ReadAll(allInfo.Body)
-		err = json.Unmarshal(countrybody, &cntry)
-		if err != nil {
-			fmt.Println("Error in response:", err.Error())
-			http.Error(w, "Error in response:", http.StatusInternalServerError)
+func storePolicyData(data map[string]interface{}) consts.PolicyResults {
+	if _, ok := data["msg"]; ok {
+		fmt.Println("Hei2")
+		return consts.PolicyResults{
+			"",
+			"",
+			-1,
+			-1,
+			-1,
+			-1,
+		}
+		//random := consts.PolicyResults{}
+		//return random
+	} else {
+		return consts.PolicyResults{
+			data["date_value"].(string),
+			data["country_code"].(string),
+			data["confirmed"].(float64),
+			data["deaths"].(float64),
+			data["stringency_actual"].(float64),
+			data["stringency"].(float64),
 		}
 
-		bord := cntry[0].Borders
-		var alphaBody []byte
-
-		// Step 2:
-		// Bordering country alphas => Full names (ex. ["Finland", "Russian Federation", "Sweden"])
-		tempurl := "https://restcountries.com/v3.1/alpha?codes="
-		for i, temp := range bord {
-			if i < len(bord)-1 {
-				temp += ","
-			}
-			tempurl += temp
-		}
-
-		fullUrl, _ := http.Get(tempurl)
-		fullUrlBody, _ := io.ReadAll(fullUrl.Body)
-		alphaBody = append(alphaBody, fullUrlBody...)
-
-		var borderingCountries []consts.Results
-		err = json.Unmarshal(alphaBody, &borderingCountries)
-		if err != nil {
-			fmt.Println("Error in response:", err.Error())
-		}
-
-		// Step 3:
-		// Full names => Universities in each country, matching (partially) with `WantUni`
-		var doneAppending bool = false
-		var writeBorderUnis []consts.Results
-		for i, _ := range borderingCountries {
-			if doneAppending {
-				break
-			}
-			unis := UnisGetByNameAndCountry(WantDate, borderingCountries[i].Name.Common)
-
-			for _, uni := range unis {
-				writeBorderUnis = append(writeBorderUnis, uni)
-				if len(writeBorderUnis) >= limit && !noLimitSet {
-					doneAppending = true
-					break
-				}
-			}
-		}
-
-		// Step 4.
-		// Add local universities (universities of `WantCountry` that matches `WantUni`)
-		unis := UnisGetByNameAndCountry(WantDate, WantCountry)
-		writeBorderUnis = append(writeBorderUnis, unis...)
-
-		// Step 5: (last step)
-		// Write and return
-		writeBody, _ := json.Marshal(writeBorderUnis)
-		w.Header().Add("content-type", "application/json")
-		w.Write(writeBody)
-
-	*/
+	}
 }
