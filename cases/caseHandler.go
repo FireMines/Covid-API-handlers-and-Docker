@@ -28,21 +28,26 @@ func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
+
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
 	r.Header.Add("content-type", "application/json")
+	if urlLastVal == "cases" {
+		http.Error(w, "Looks like you forgot to add a country! Place do so next time ;)", http.StatusBadRequest)
+		return
+	}
 
 	// Get country matching the name in the URL
 	countryInfo := getCovidCasesPerCountry(urlLastVal)
 
 	// Marshal them and write to Writer
-	writeUnis, err := json.Marshal(countryInfo)
+	writeCountry, err := json.Marshal(countryInfo)
 	if err != nil {
 		fmt.Println("Error in response:", err.Error())
 		http.Error(w, "Error in response:", http.StatusInternalServerError)
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Write(writeUnis)
+	w.Write(writeCountry)
 
 }
 
