@@ -33,6 +33,7 @@ import (
 	consts "covidAss2"
 	cases "covidAss2/cases"
 	handler "covidAss2/handler"
+	notifications "covidAss2/notifications"
 	policy "covidAss2/policy"
 	status "covidAss2/status"
 
@@ -163,7 +164,6 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	//Start := time.Now()
 	consts.Start = time.Now()
 
 	// Firebase initialisation
@@ -209,7 +209,7 @@ func main() {
 	http.HandleFunc(covidAss2.COVIDCASES, cases.CovidInfoHandler)
 	http.HandleFunc(covidAss2.COVIDPOLICY, policy.PolicyHandler)
 	http.HandleFunc(covidAss2.COVIDSTATUS, status.StatusHandler)
-	//http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, notifications.NotificationHandler)
+	http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, notifications.NotificationHandler)
 	http.HandleFunc(covidAss2.DEFAULT_PATH, handler.EmptyHandler)
 
 	log.Printf("Listening on %s ...\n", addr)

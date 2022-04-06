@@ -16,12 +16,10 @@ Entry point handler for policy information
 func PolicyHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
-	case http.MethodPost:
-		//handleMapPostRequest(w, r)
 	case http.MethodGet:
 		policyGetRequest(w, r)
 	default:
-		http.Error(w, "Method not supported. Currently only POST and GET are supported.", http.StatusNotImplemented)
+		http.Error(w, "Method not supported. Currently only GET are supported.", http.StatusNotImplemented)
 		return
 	}
 
@@ -31,7 +29,6 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Country you are searching for
 	WantCountry := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20") // Gets the first output from path
-	//WantDate := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")    // Gets the second output from path
 
 	scope := r.URL.Query().Get("scope") // Gets the optional limit put on how many to output
 	if scope == "" {
@@ -56,7 +53,6 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cntry := storePolicyData(tester["stringencyData"].(map[string]interface{}))
-	fmt.Println("Hei1")
 	/* 	if cntry.Date == "" || cntry.CountryCode == "" || cntry.Confirmed == 0 || cntry.Deaths == 0 || cntry.StringencyActual == 0 || cntry.Stringency == 0 {
 		http.Error(w, "Input did not contain complete policy specification. Recheck posted policy information and resubmit.", http.StatusBadRequest)
 		fmt.Println("Empty ID on country:", cntry)
@@ -79,7 +75,6 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 
 func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 	if _, ok := data["msg"]; ok {
-		fmt.Println("Hei2")
 		return consts.PolicyResults{
 			"",
 			"",
@@ -88,8 +83,6 @@ func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 			-1,
 			-1,
 		}
-		//random := consts.PolicyResults{}
-		//return random
 	} else {
 		return consts.PolicyResults{
 			data["date_value"].(string),
@@ -99,6 +92,5 @@ func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 			data["stringency_actual"].(float64),
 			data["stringency"].(float64),
 		}
-
 	}
 }
