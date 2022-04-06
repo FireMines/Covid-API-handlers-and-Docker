@@ -25,3 +25,10 @@ type PolicyResults struct {
 	   	Flagged            string `json:"flagged"`
 	   	Notes              string `json:"notes" */
 }
+
+type WebhookRegistration struct {
+	Url         string `json:"url"`
+	Country     string `json:"country"`
+	Calls       int    `json:"calls"`
+	Weebhook_ID string `json:"webhook_id"`
+}

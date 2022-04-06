@@ -13,8 +13,11 @@ const COVIDTRACKERCHECK = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringenc
 const COVIDCASES = "/corona/" + VERSIONNUMBER + "/cases/"
 const COVIDPOLICY = "/corona/" + VERSIONNUMBER + "/policy/"
 const COVIDSTATUS = "/corona/" + VERSIONNUMBER + "/status/"
-const COVIDNOTIFICATIONS = "corona/" + VERSIONNUMBER + "/notifications/"
+const COVIDNOTIFICATIONS = "/corona/" + VERSIONNUMBER + "/notifications/"
 const RESOURCE_ROOT_PATH = "http://localhost:8080/"
 
 // Global timer
 var Start time.Time
+
+// Webhook ID length before hashing
+var GenLength = 64
