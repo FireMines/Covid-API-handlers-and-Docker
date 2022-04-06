@@ -33,6 +33,7 @@ import (
 	consts "covidAss2"
 	cases "covidAss2/cases"
 	handler "covidAss2/handler"
+	policy "covidAss2/policy"
 	status "covidAss2/status"
 
 	"cloud.google.com/go/firestore"   // Firestore-specific support
@@ -206,7 +207,7 @@ func main() {
 	http.HandleFunc("/messages", handleMessage) // Be forgiving in case people for get the trailing /
 	http.HandleFunc("/messages/", handleMessage)
 	http.HandleFunc(covidAss2.COVIDCASES, cases.CovidInfoHandler)
-	//http.HandleFunc(covidAss2.COVIDPOLICY, policy.PolicyHandler)
+	http.HandleFunc(covidAss2.COVIDPOLICY, policy.PolicyHandler)
 	http.HandleFunc(covidAss2.COVIDSTATUS, status.StatusHandler)
 	//http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, notifications.NotificationHandler)
 	http.HandleFunc(covidAss2.DEFAULT_PATH, handler.EmptyHandler)
