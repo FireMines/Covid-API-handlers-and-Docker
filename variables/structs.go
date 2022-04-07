@@ -1,4 +1,4 @@
-package covidAss2
+package consts
 
 type Results struct {
 	Name       string  `json:"name"`

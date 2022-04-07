@@ -1,10 +1,6 @@
 package notifications
 
 import (
-	"context"
-	"crypto/hmac"
-	"crypto/sha512"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,17 +10,10 @@ import (
 	"strings"
 
 	consts "covidAss2/variables"
-
-	"cloud.google.com/go/firestore"
-	firebase "firebase.google.com/go"
-	"google.golang.org/api/option"
 )
 
 // Webhook DB
 var Webhooks = []consts.WebhookRegistration{}
-
-var ctx context.Context
-var client *firestore.Client
 
 const collection = "webhooks"
 
@@ -54,29 +43,16 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
 	}
-	randString := RandomString(consts.GenLength)
-	hash := hmac.New(sha512.New, []byte(randString))
-	webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
 
+	id, _, err := consts.Client.Collection(collection).Add(consts.Ctx,
+		map[string]interface{}{
+			"url":     webhook.Url,
+			"country": webhook.Country,
+			"calls":   webhook.Calls,
+		})
+	webhook.Weebhook_ID = id.ID
 	Webhooks = append(Webhooks, webhook)
 
-	ctx = context.Background()
-
-	sa := option.WithCredentialsFile("./firebase-key.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	client, err = app.Firestore(ctx)
-
-	id, _, err := client.Collection(collection).Add(ctx,
-		map[string]interface{}{
-			"weebhook_id": webhook.Weebhook_ID,
-			"url":         webhook.Url,
-			"country":     webhook.Country,
-			"calls":       webhook.Calls,
-		})
 	fmt.Println("Webhook_id for POST just done: ", webhook.Weebhook_ID)
 	fmt.Println("Webhook " + webhook.Url + " has been registered.")
 	http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
@@ -127,6 +103,11 @@ func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	for i := range Webhooks {
 		if Webhooks[i].Weebhook_ID == urlLastVal {
+			_, err := consts.Client.Collection(collection).Doc(urlLastVal).Delete(consts.Ctx)
+			if err != nil {
+				// Handle any errors in an appropriate way, such as returning them.
+				log.Printf("An error has occurred: %s", err)
+			}
 			Webhooks = append(Webhooks[:i], Webhooks[i+1:]...)
 			return
 		}

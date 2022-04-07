@@ -1,6 +1,11 @@
-package covidAss2
+package consts
 
-import "time"
+import (
+	"context"
+	"time"
+
+	"cloud.google.com/go/firestore"
+)
 
 // Url Paths
 const DEFAULT_PATH = "/"
@@ -21,3 +26,7 @@ var Start time.Time
 
 // Webhook ID length before hashing
 var GenLength = 64
+
+// Firebase initialisation
+var Ctx context.Context
+var Client *firestore.Client

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"context" // State handling across API boundaries; part of native GoLang API
+	// State handling across API boundaries; part of native GoLang API
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -24,7 +25,7 @@ import (
 )
 
 // Firebase context and client used by Firestore functions throughout the program.
-var ctx context.Context
+//var consts.Ctx context.Context
 var client *firestore.Client
 
 // Collection name in Firestore
@@ -54,7 +55,7 @@ func displayMessage(w http.ResponseWriter, r *http.Request) {
 		res := client.Collection(collection).Doc(messageId)
 
 		// Retrieve reference to document
-		doc, err2 := res.Get(ctx)
+		doc, err2 := res.Get(consts.Ctx)
 		if err2 != nil {
 			http.Error(w, "Error extracting body of returned document of message "+messageId, http.StatusInternalServerError)
 			return
@@ -69,7 +70,7 @@ func displayMessage(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Collective retrieval of messages
-		iter := client.Collection(collection).Documents(ctx) // Loop through all entries in collection "messages"
+		iter := client.Collection(collection).Documents(consts.Ctx) // Loop through all entries in collection "messages"
 
 		for {
 			doc, err := iter.Next()
@@ -108,7 +109,7 @@ func addMessage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// Add element in embedded structure.
 		// Note: this structure is defined by the client; but exemplifying a complex one here (including Firestore timestamps).
-		id, _, err := client.Collection(collection).Add(ctx,
+		id, _, err := client.Collection(collection).Add(consts.Ctx,
 			map[string]interface{}{
 				"text": string(text),
 				"ct":   ct,
@@ -145,33 +146,34 @@ func handleMessage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	consts.Start = time.Now()
-
-	// Firebase initialisation
-	ctx = context.Background()
-
+	consts.Ctx = context.Background()
 	// We use a service account, load credentials file that you downloaded from your project's settings menu.
 	// It should reside in your project directory.
 	// Make sure this file is git-ignored, since it is the access token to the database.
 	sa := option.WithCredentialsFile("./firebase-key.json")
-	app, err := firebase.NewApp(ctx, nil, sa)
+	app, err := firebase.NewApp(consts.Ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Instantiate client
-	client, err = app.Firestore(ctx)
+	consts.Client, err = app.Firestore(consts.Ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// Alternative setup, directly through Firestore (without initial reference to Firebase); but requires Project ID
-	// client, err := firestore.NewClient(ctx, projectID)
+	// client, err := firestore.NewClient(consts.Ctx, projectID)
 
 	// Collective retrieval of messages
-	iter := client.Collection(collection).Documents(ctx) // Loop through all entries in collection "messages"
+	iter := consts.Client.Collection(collection).Documents(consts.Ctx) // Loop through all entries in collection "messages"
 
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
+		//doc.ref.ID
 		if err != nil {
 			log.Fatalf("Failed to iterate: %v", err)
 		}
@@ -179,20 +181,12 @@ func main() {
 
 		// A message map with string keys. Each key is one field, like "text" or "timestamp"
 		m := doc.Data()
-		notifications.Webhooks = append(notifications.Webhooks, storeData(m))
+		notifications.Webhooks = append(notifications.Webhooks, storeData(m, doc))
 	}
 
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	// Close down client
-	defer func() {
-		err := client.Close()
-		if err != nil {
-			log.Fatal("Closing of the firebase client failed. Error:", err)
-		}
-	}()
 
 	// Make it Heroku-compatible
 	port := os.Getenv("PORT")
@@ -214,15 +208,19 @@ func main() {
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		panic(err)
 	}
+	// Close down client
+	defer func() {
+		err := consts.Client.Close()
+		if err != nil {
+			log.Fatal("Closing of the firebase client failed. Error:", err)
+		}
+	}()
 }
-func storeData(data map[string]interface{}) consts.WebhookRegistration {
-	//data = (data["country"].(map[string]interface{}))
-	//allData := data["mostRecent"].(map[string]interface{})
-
+func storeData(data map[string]interface{}, doc *firestore.DocumentSnapshot) consts.WebhookRegistration {
 	return consts.WebhookRegistration{
-		data["weebhook_id"].(string),
-		data["url"].(string),
-		data["country"].(string),
-		data["calls"].(int64),
+		Weebhook_ID: doc.Ref.ID,
+		Url:         doc.Data()["url"].(string),
+		Country:     doc.Data()["country"].(string),
+		Calls:       doc.Data()["calls"].(int64),
 	}
 }
