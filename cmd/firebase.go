@@ -1,22 +1,3 @@
-/* package main
-
-import (
-	"fmt"
-	"context"
-
-	firebase "firebase.google.com/go"
-	"firebase.google.com/go/auth"
-
-	"google.golang.org/api/option"
-  )
-
-  var opt = option.WithCredentialsFile("path/to/serviceAccountKey.json")
-  var app, err = firebase.NewApp(context.Background(), nil, opt)
-  if err != nil {
-	return nil, fmt.Errorf("error initializing app: %v", err)
-  }
-*/
-
 package main
 
 import (
@@ -47,7 +28,7 @@ var ctx context.Context
 var client *firestore.Client
 
 // Collection name in Firestore
-const collection = "messages"
+const collection = "webhooks"
 
 // Message counter to produce some variation in content
 var ct = 0
@@ -183,6 +164,24 @@ func main() {
 	// Alternative setup, directly through Firestore (without initial reference to Firebase); but requires Project ID
 	// client, err := firestore.NewClient(ctx, projectID)
 
+	// Collective retrieval of messages
+	iter := client.Collection(collection).Documents(ctx) // Loop through all entries in collection "messages"
+
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to iterate: %v", err)
+		}
+		// Note: You can access the document ID using "doc.Ref.ID"
+
+		// A message map with string keys. Each key is one field, like "text" or "timestamp"
+		m := doc.Data()
+		notifications.Webhooks = append(notifications.Webhooks, storeData(m))
+	}
+
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -214,5 +213,16 @@ func main() {
 	log.Printf("Listening on %s ...\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		panic(err)
+	}
+}
+func storeData(data map[string]interface{}) consts.WebhookRegistration {
+	//data = (data["country"].(map[string]interface{}))
+	//allData := data["mostRecent"].(map[string]interface{})
+
+	return consts.WebhookRegistration{
+		data["weebhook_id"].(string),
+		data["url"].(string),
+		data["country"].(string),
+		data["calls"].(int64),
 	}
 }

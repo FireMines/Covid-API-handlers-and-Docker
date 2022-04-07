@@ -91,7 +91,6 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, id.ID, http.StatusCreated)
 		return
 	}
-
 }
 
 func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
