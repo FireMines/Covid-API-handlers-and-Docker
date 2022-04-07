@@ -1,7 +1,7 @@
 package policy
 
 import (
-	consts "covidAss2"
+	consts "covidAss2/variables"
 )
 
 func storePolicyData(data map[string]interface{}) consts.PolicyResults {

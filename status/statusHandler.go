@@ -1,8 +1,8 @@
 package status
 
 import (
-	consts "covidAss2"
 	"covidAss2/notifications"
+	consts "covidAss2/variables"
 	"encoding/json"
 	"fmt"
 	"net/http"

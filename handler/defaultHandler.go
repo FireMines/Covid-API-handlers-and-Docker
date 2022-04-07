@@ -1,7 +1,7 @@
 package handler
 
 import (
-	consts "covidAss2"
+	consts "covidAss2/variables"
 	"net/http"
 )
 

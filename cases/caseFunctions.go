@@ -2,7 +2,7 @@ package cases
 
 import (
 	"context"
-	consts "covidAss2"
+	consts "covidAss2/variables"
 	"fmt"
 
 	"github.com/machinebox/graphql"

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	consts "covidAss2"
+	consts "covidAss2/variables"
 )
 
 // Webhook DB

@@ -29,13 +29,12 @@ import (
 	"strings"
 	"time"
 
-	"covidAss2"
-	consts "covidAss2"
 	cases "covidAss2/cases"
 	handler "covidAss2/handler"
 	notifications "covidAss2/notifications"
 	policy "covidAss2/policy"
 	status "covidAss2/status"
+	consts "covidAss2/variables"
 
 	"cloud.google.com/go/firestore"   // Firestore-specific support
 	firebase "firebase.google.com/go" // Generic firebase support
@@ -206,11 +205,11 @@ func main() {
 
 	http.HandleFunc("/messages", handleMessage) // Be forgiving in case people for get the trailing /
 	http.HandleFunc("/messages/", handleMessage)
-	http.HandleFunc(covidAss2.COVIDCASES, cases.CovidInfoHandler)
-	http.HandleFunc(covidAss2.COVIDPOLICY, policy.PolicyHandler)
-	http.HandleFunc(covidAss2.COVIDSTATUS, status.StatusHandler)
-	http.HandleFunc(covidAss2.COVIDNOTIFICATIONS, notifications.NotificationHandler)
-	http.HandleFunc(covidAss2.DEFAULT_PATH, handler.EmptyHandler)
+	http.HandleFunc(consts.COVIDCASES, cases.CovidInfoHandler)
+	http.HandleFunc(consts.COVIDPOLICY, policy.PolicyHandler)
+	http.HandleFunc(consts.COVIDSTATUS, status.StatusHandler)
+	http.HandleFunc(consts.COVIDNOTIFICATIONS, notifications.NotificationHandler)
+	http.HandleFunc(consts.DEFAULT_PATH, handler.EmptyHandler)
 
 	log.Printf("Listening on %s ...\n", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {

@@ -1,7 +1,7 @@
 package policy
 
 import (
-	consts "covidAss2"
+	consts "covidAss2/variables"
 	"encoding/json"
 	"fmt"
 	"net/http"
