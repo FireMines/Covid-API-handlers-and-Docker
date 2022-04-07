@@ -48,20 +48,32 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 	webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
 
 	Webhooks = append(Webhooks, webhook)
-	// Note: Approach does not guarantee persistence or permanence of resource id (for CRUD)
-	//fmt.Fprintln(w, len(webhooks)-1)
-
 	fmt.Println("Webhook " + webhook.Url + " has been registered.")
 	http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
 }
 
 func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
-	r.Header.Add("content-type", "application/json")
+	w.Header().Add("content-type", "application/json")
 
-	err := json.NewEncoder(w).Encode(Webhooks)
-	if err != nil {
-		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
+	fmt.Println(urlLastVal)
+	if urlLastVal == "notifications" {
+		err := json.NewEncoder(w).Encode(Webhooks)
+		if err != nil {
+			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+		}
+		return
 	}
+	for i := range Webhooks {
+		if Webhooks[i].Weebhook_ID == urlLastVal {
+			err := json.NewEncoder(w).Encode(Webhooks[i])
+			if err != nil {
+				http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+	}
+
 }
 
 func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
@@ -76,22 +88,6 @@ func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 		if Webhooks[i].Weebhook_ID == urlLastVal {
 			Webhooks = append(Webhooks[:i], Webhooks[i+1:]...)
 			return
-		} /* else {
-			fmt.Println("No webhook with this id: %s", urlLastVal)
-		} */
+		}
 	}
-	/* 	form := url.Values{}
-	   	form.Add("webhook_id", strconv.Itoa(5))
-	   	body := strings.NewReader(form.Encode())
-	   	req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
-	   	if err != nil {
-	   		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-	   	}
-	   	client := &http.Client{}
-	   	resp, err := client.Do(req)
-	   	if err != nil {
-	   		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-	   	}
-	   	defer resp.Body.Close()
-	*/
 }
