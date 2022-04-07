@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -24,46 +23,11 @@ Entry point handler for Location information
 func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		// Expects incoming body in terms of WebhookRegistration struct
-		webhook := consts.WebhookRegistration{}
-		err := json.NewDecoder(r.Body).Decode(&webhook)
-		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
-		}
-		randString := RandomString(consts.GenLength)
-		hash := hmac.New(sha512.New, []byte(randString))
-		webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
-
-		Webhooks = append(Webhooks, webhook)
-		// Note: Approach does not guarantee persistence or permanence of resource id (for CRUD)
-		//fmt.Fprintln(w, len(webhooks)-1)
-		fmt.Println("Webhook " + webhook.Url + " has been registered.")
-		http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
-
 		notificationPostRequest(w, r)
-
 	case http.MethodGet:
 		notificationGetRequest(w, r)
-		err := json.NewEncoder(w).Encode(Webhooks)
-		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-		}
-
 	case http.MethodDelete:
-		form := url.Values{}
-		form.Add("webhook_id", strconv.Itoa(5))
-		body := strings.NewReader(form.Encode())
-		req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
-		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-		}
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-		}
-		defer resp.Body.Close()
-
+		notificationDeleteRequest(w, r)
 	default:
 		http.Error(w, "Method not supported. Currently only GET and POST are supported.", http.StatusNotImplemented)
 		return
@@ -71,18 +35,47 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("content-type", "application/json")
 
+	// Expects incoming body in terms of WebhookRegistration struct
+	webhook := consts.WebhookRegistration{}
+	err := json.NewDecoder(r.Body).Decode(&webhook)
+	if err != nil {
+		http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
+	}
+	randString := RandomString(consts.GenLength)
+	hash := hmac.New(sha512.New, []byte(randString))
+	webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
+
+	Webhooks = append(Webhooks, webhook)
+	// Note: Approach does not guarantee persistence or permanence of resource id (for CRUD)
+	//fmt.Fprintln(w, len(webhooks)-1)
+
+	fmt.Println("Webhook " + webhook.Url + " has been registered.")
+	http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
 }
 
 func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
+	r.Header.Add("content-type", "application/json")
 
+	err := json.NewEncoder(w).Encode(Webhooks)
+	if err != nil {
+		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	}
 }
 
-func RandomString(n int) string {
-	var characterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = characterRunes[rand.Intn(len(characterRunes))]
+func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
+	form := url.Values{}
+	form.Add("webhook_id", strconv.Itoa(5))
+	body := strings.NewReader(form.Encode())
+	req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
+	if err != nil {
+		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
 	}
-	return string(b)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	}
+	defer resp.Body.Close()
 }
