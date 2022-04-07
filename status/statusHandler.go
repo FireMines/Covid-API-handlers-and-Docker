@@ -2,6 +2,7 @@ package status
 
 import (
 	consts "covidAss2"
+	"covidAss2/notifications"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -44,9 +45,9 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 	statusInfo := map[string]interface{}{
 		"cases_api":  res.StatusCode,
 		"policy_api": res2.StatusCode, // Getting 400 Error, seems like this is okey(??)
-		//"webhooks":		,
-		"version": consts.VERSIONNUMBER,
-		"uptime":  Elapsed.Seconds(),
+		"webhooks":   len(notifications.Webhooks),
+		"version":    consts.VERSIONNUMBER,
+		"uptime":     Elapsed.Seconds(),
 	}
 
 	w.Header().Add("content-type", "application/json")

@@ -8,13 +8,15 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	consts "covidAss2"
 )
 
 // Webhook DB
-var webhooks = []consts.WebhookRegistration{}
+var Webhooks = []consts.WebhookRegistration{}
 
 /*
 Entry point handler for Location information
@@ -32,22 +34,35 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 		hash := hmac.New(sha512.New, []byte(randString))
 		webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
 
-		webhooks = append(webhooks, webhook)
+		Webhooks = append(Webhooks, webhook)
 		// Note: Approach does not guarantee persistence or permanence of resource id (for CRUD)
 		//fmt.Fprintln(w, len(webhooks)-1)
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
-		http.Error(w, strconv.Itoa(len(webhooks)-1), http.StatusCreated)
+		http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
 
 		notificationPostRequest(w, r)
 
 	case http.MethodGet:
 		notificationGetRequest(w, r)
-		err := json.NewEncoder(w).Encode(webhooks)
+		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
 		}
 
 	case http.MethodDelete:
+		form := url.Values{}
+		form.Add("webhook_id", strconv.Itoa(5))
+		body := strings.NewReader(form.Encode())
+		req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
+		if err != nil {
+			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+		}
+		defer resp.Body.Close()
 
 	default:
 		http.Error(w, "Method not supported. Currently only GET and POST are supported.", http.StatusNotImplemented)
