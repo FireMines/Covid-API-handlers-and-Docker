@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
+	"path"
 	"strconv"
 	"strings"
 
@@ -65,17 +65,33 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
-	form := url.Values{}
-	form.Add("webhook_id", strconv.Itoa(5))
-	body := strings.NewReader(form.Encode())
-	req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
-	if err != nil {
-		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
+	fmt.Println(urlLastVal)
+	r.Header.Add("content-type", "application/json")
+	if urlLastVal == "notifications" {
+		http.Error(w, "Looks like you forgot to add a webhook_id! Place do so next time ;)", http.StatusBadRequest)
+		return
 	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	for i := range Webhooks {
+		if Webhooks[i].Weebhook_ID == urlLastVal {
+			Webhooks = append(Webhooks[:i], Webhooks[i+1:]...)
+			return
+		} /* else {
+			fmt.Println("No webhook with this id: %s", urlLastVal)
+		} */
 	}
-	defer resp.Body.Close()
+	/* 	form := url.Values{}
+	   	form.Add("webhook_id", strconv.Itoa(5))
+	   	body := strings.NewReader(form.Encode())
+	   	req, err := http.NewRequest("DELETE", consts.RESOURCE_ROOT_PATH+consts.COVIDNOTIFICATIONS, body)
+	   	if err != nil {
+	   		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	   	}
+	   	client := &http.Client{}
+	   	resp, err := client.Do(req)
+	   	if err != nil {
+	   		http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+	   	}
+	   	defer resp.Body.Close()
+	*/
 }
