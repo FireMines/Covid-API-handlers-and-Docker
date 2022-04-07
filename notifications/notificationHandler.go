@@ -1,21 +1,32 @@
 package notifications
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"path"
 	"strconv"
 	"strings"
 
 	consts "covidAss2/variables"
+
+	"cloud.google.com/go/firestore"
+	firebase "firebase.google.com/go"
+	"google.golang.org/api/option"
 )
 
 // Webhook DB
 var Webhooks = []consts.WebhookRegistration{}
+
+var ctx context.Context
+var client *firestore.Client
+
+const collection = "webhooks"
 
 /*
 Entry point handler for Location information
@@ -48,15 +59,46 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 	webhook.Weebhook_ID = hex.EncodeToString(hash.Sum(nil))
 
 	Webhooks = append(Webhooks, webhook)
+
+	ctx = context.Background()
+
+	sa := option.WithCredentialsFile("./firebase-key.json")
+	app, err := firebase.NewApp(ctx, nil, sa)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	client, err = app.Firestore(ctx)
+
+	id, _, err := client.Collection(collection).Add(ctx,
+		map[string]interface{}{
+			"weebhook_id": webhook.Weebhook_ID,
+			"url":         webhook.Url,
+			"country":     webhook.Country,
+			"calls":       webhook.Calls,
+		})
+	fmt.Println("Webhook_id for POST just done: ", webhook.Weebhook_ID)
 	fmt.Println("Webhook " + webhook.Url + " has been registered.")
 	http.Error(w, strconv.Itoa(len(Webhooks)-1), http.StatusCreated)
+
+	if err != nil {
+		// Error handling
+		http.Error(w, "Error when adding message "+webhook.Weebhook_ID+", Error: "+err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		fmt.Println("Entry added to collection. Identifier of returned document: " + id.ID)
+		// Returns document ID in body
+		http.Error(w, id.ID, http.StatusCreated)
+		return
+	}
+
 }
 
 func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
-	fmt.Println(urlLastVal)
+	//fmt.Println(urlLastVal)
 	if urlLastVal == "notifications" {
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {

@@ -27,8 +27,8 @@ type PolicyResults struct {
 }
 
 type WebhookRegistration struct {
+	Weebhook_ID string `json:"webhook_id"`
 	Url         string `json:"url"`
 	Country     string `json:"country"`
 	Calls       int    `json:"calls"`
-	Weebhook_ID string `json:"webhook_id"`
 }
