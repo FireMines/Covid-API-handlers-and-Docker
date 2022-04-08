@@ -3,12 +3,9 @@ package main
 import (
 	// State handling across API boundaries; part of native GoLang API
 	"context"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	cases "covidAss2/cases"
@@ -26,123 +23,11 @@ import (
 
 // Firebase context and client used by Firestore functions throughout the program.
 //var consts.Ctx context.Context
-var client *firestore.Client
 
 // Collection name in Firestore
 const collection = "webhooks"
 
 // Message counter to produce some variation in content
-var ct = 0
-
-// Tasks:
-// - Introduce update functionality via PUT and/or PATCH
-// - Introduce delete functionality
-// - Adapt addMessage and displayMessage function to support custom JSON schema
-
-/*
-Lists all the messages in the messages collection to the user.
-*/
-func displayMessage(w http.ResponseWriter, r *http.Request) {
-
-	// Test for embedded message ID from URL
-	elem := strings.Split(r.URL.Path, "/")
-	messageId := elem[2]
-
-	if len(messageId) != 0 {
-		// Extract individual message
-
-		// Retrieve specific message based on id (Firestore-generated hash)
-		res := client.Collection(collection).Doc(messageId)
-
-		// Retrieve reference to document
-		doc, err2 := res.Get(consts.Ctx)
-		if err2 != nil {
-			http.Error(w, "Error extracting body of returned document of message "+messageId, http.StatusInternalServerError)
-			return
-		}
-
-		// A message map with string keys. Each key is one field, like "text" or "timestamp"
-		m := doc.Data()
-		_, err3 := fmt.Fprintln(w, m["text"])
-		if err3 != nil {
-			http.Error(w, "Error while writing response body of message "+messageId, http.StatusInternalServerError)
-			return
-		}
-	} else {
-		// Collective retrieval of messages
-		iter := client.Collection(collection).Documents(consts.Ctx) // Loop through all entries in collection "messages"
-
-		for {
-			doc, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				log.Fatalf("Failed to iterate: %v", err)
-			}
-			// Note: You can access the document ID using "doc.Ref.ID"
-
-			// A message map with string keys. Each key is one field, like "text" or "timestamp"
-			m := doc.Data()
-			_, err = fmt.Fprintln(w, m)
-			if err != nil {
-				http.Error(w, "Error while writing response body.", http.StatusInternalServerError)
-			}
-		}
-	}
-
-}
-
-/*
-Reads a string from the body in plain-text and sends it to firestore to be registered as a message.
-*/
-func addMessage(w http.ResponseWriter, r *http.Request) {
-	// very generic way of reading body; should be customized to specific use case
-	text, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Reading of payload failed", http.StatusInternalServerError)
-		return
-	}
-	fmt.Println("Received message ", string(text))
-	if len(string(text)) == 0 {
-		http.Error(w, "Your message appears to be empty. Ensure to terminate URI with /.", http.StatusBadRequest)
-	} else {
-		// Add element in embedded structure.
-		// Note: this structure is defined by the client; but exemplifying a complex one here (including Firestore timestamps).
-		id, _, err := client.Collection(collection).Add(consts.Ctx,
-			map[string]interface{}{
-				"text": string(text),
-				"ct":   ct,
-				"time": firestore.ServerTimestamp,
-			})
-		ct++
-		if err != nil {
-			// Error handling
-			http.Error(w, "Error when adding message "+string(text)+", Error: "+err.Error(), http.StatusBadRequest)
-			return
-		} else {
-			fmt.Println("Entry added to collection. Identifier of returned document: " + id.ID)
-			// Returns document ID in body
-			http.Error(w, id.ID, http.StatusCreated)
-			return
-		}
-	}
-}
-
-/*
-Handler for all message-related operations
-*/
-func handleMessage(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		addMessage(w, r)
-	case http.MethodGet:
-		displayMessage(w, r)
-	default:
-		http.Error(w, "Unsupported request method", http.StatusMethodNotAllowed)
-		return
-	}
-}
 
 func main() {
 	consts.Start = time.Now()
@@ -173,7 +58,6 @@ func main() {
 		if err == iterator.Done {
 			break
 		}
-		//doc.ref.ID
 		if err != nil {
 			log.Fatalf("Failed to iterate: %v", err)
 		}
@@ -196,8 +80,6 @@ func main() {
 
 	addr := ":" + port
 
-	http.HandleFunc("/messages", handleMessage) // Be forgiving in case people for get the trailing /
-	http.HandleFunc("/messages/", handleMessage)
 	http.HandleFunc(consts.COVIDCASES, cases.CovidInfoHandler)
 	http.HandleFunc(consts.COVIDPOLICY, policy.PolicyHandler)
 	http.HandleFunc(consts.COVIDSTATUS, status.StatusHandler)

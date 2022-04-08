@@ -14,7 +14,6 @@ import (
 Entry point handler for policy information
 */
 func PolicyHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case http.MethodGet:
 		policyGetRequest(w, r)
@@ -53,7 +52,7 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cntry := storePolicyData(dataRaw["stringencyData"].(map[string]interface{}))
-	policies := dataRaw["policyActions"].([]interface{}) //getData() {
+	policies := dataRaw["policyActions"].([]interface{})
 
 	validPolicies := 0
 
