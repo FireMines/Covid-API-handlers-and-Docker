@@ -13,6 +13,7 @@ func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 			-1,
 			-1,
 			-1,
+			-1,
 		}
 	} else {
 		return consts.PolicyResults{
@@ -22,6 +23,7 @@ func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 			data["deaths"].(float64),
 			data["stringency_actual"].(float64),
 			data["stringency"].(float64),
+			0,
 		}
 	}
 }

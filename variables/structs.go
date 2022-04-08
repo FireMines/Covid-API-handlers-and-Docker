@@ -16,6 +16,7 @@ type PolicyResults struct {
 	Deaths           float64 `json:"deaths"`
 	StringencyActual float64 `json:"stringency_actual"`
 	Stringency       float64 `json:"stringency"`
+	Policy           int     `json:"policy"`
 
 	/* 	TypeCode           string `json:"policy_type_code"`
 	   	TypeDisplay        string `json:"policy_type_display"`

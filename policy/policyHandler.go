@@ -39,25 +39,32 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(consts.COVIDTRACKER + WantCountry + "/" + scope)
 	resp, err := http.Get(consts.COVIDTRACKER + WantCountry + "/" + scope)
 	if err != nil {
-		http.Error(w, "1God damn it, you goofed up. Now back that badonkadonk up and fix it", http.StatusBadRequest)
+		http.Error(w, "Fault while getting covidtracker and country", http.StatusBadRequest)
 		fmt.Println("Decoding1: " + err.Error())
 		return
 	}
 
-	tester := map[string]interface{}{}
-	err = json.NewDecoder(resp.Body).Decode(&tester)
+	dataRaw := map[string]interface{}{}
+	err = json.NewDecoder(resp.Body).Decode(&dataRaw)
 	if err != nil {
-		http.Error(w, "2God damn it, you goofed up. Now back that badonkadonk up and fix it", http.StatusBadRequest)
+		http.Error(w, "Fault while decoding", http.StatusBadRequest)
 		fmt.Println("Decoding2: " + err.Error())
 		return
 	}
 
-	cntry := storePolicyData(tester["stringencyData"].(map[string]interface{}))
-	/* 	if cntry.Date == "" || cntry.CountryCode == "" || cntry.Confirmed == 0 || cntry.Deaths == 0 || cntry.StringencyActual == 0 || cntry.Stringency == 0 {
-		http.Error(w, "Input did not contain complete policy specification. Recheck posted policy information and resubmit.", http.StatusBadRequest)
-		fmt.Println("Empty ID on country:", cntry)
+	cntry := storePolicyData(dataRaw["stringencyData"].(map[string]interface{}))
+	policies := dataRaw["policyActions"].([]interface{}) //getData() {
 
-	} */
+	validPolicies := 0
+
+	for _, j0 := range policies {
+		j := j0.(map[string]interface{})
+		if j["policy_type_code"].(string) != "NONE" {
+			validPolicies++
+		}
+	}
+	cntry.Policy = validPolicies
+	fmt.Println(len(policies))
 
 	defer resp.Body.Close()
 
