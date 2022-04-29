@@ -21,6 +21,7 @@ Example for url:
 ## Endpoint overview
 
 ### Default url: http://localhost:8080/
+### Default server url: http://10.212.139.118:8080/
 
 ### Endpoints
 
@@ -133,6 +134,26 @@ Body:
     "calls": 5
     }
 
+
+#### Status Endpoint (/corona/v1/status/):
+    Method: GET
+    Path: /corona/v1/status/
+
+
+##### Example Endpoint commands in Postman:
+Method: **Get**
+
+URL: http://10.212.139.118:8080/corona/v1/status/
+
+Body:
+
+    {
+    "cases_api": 200,
+    "policy_api": 200,
+    "uptime": 318.378893772,
+    "version": "v1",
+    "webhooks": 2
+    }
 
 
 ## Assignment 2 text https://git.gvk.idi.ntnu.no/course/prog2005/prog2005-2022/-/wikis/Assignment-2
