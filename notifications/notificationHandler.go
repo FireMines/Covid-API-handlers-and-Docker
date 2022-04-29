@@ -97,7 +97,6 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-
 	}
 	// If none of the statements above happens, return status not found
 	http.Error(w, "No webhook with that ID exists!", http.StatusNotFound)

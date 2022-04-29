@@ -1,12 +1,26 @@
 package cases
 
 import (
+	"bytes"
+	"covidAss2/notifications"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 )
+
+// Initialize signature (via init())
+var SignatureKey = "X-SIGNATURE"
+
+//var Mac hash.Hash
+var Secret []byte
 
 /*
  *	Entry point handler for Location information
@@ -47,4 +61,53 @@ func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	w.Write(writeCountry)
 
+	// Iterate through registered webhooks and invoke based on registered URL, method, and with received content
+	for i, v := range notifications.Webhooks {
+		fmt.Println("Trigger event: Call to service endpoint with method " + http.MethodGet +
+			" and content '" + string(writeCountry) + "'.")
+		if notifications.Webhooks[i].Country == urlLastVal {
+			go CallUrl(v.Url, http.MethodGet, string(writeCountry))
+		}
+	}
+
+}
+
+/*
+	Calls given URL with given content and awaits response (status and body).
+*/
+func CallUrl(url string, method string, content string) {
+	fmt.Println("Attempting invocation of url " + url + " with content '" + content + "'.")
+	//res, err := http.Post(url, "text/plain", bytes.NewReader([]byte(content)))
+	req, err := http.NewRequest(method, url, bytes.NewReader([]byte(content)))
+	if err != nil {
+		log.Printf("%v Error during request creation. Error:", err)
+		return
+	}
+	// Hash content (for content-based validation; not relevant for URL-based validation)
+	mac := hmac.New(sha256.New, Secret)
+	_, err = mac.Write([]byte(content))
+	if err != nil {
+		log.Printf("%v Error during content hashing. Error:", err)
+		return
+	}
+	// Convert hash to string & add to header to transport to client for validation
+	req.Header.Add(SignatureKey, hex.EncodeToString(mac.Sum(nil)))
+
+	// Perform invocation
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println("Error in HTTP request. Error:", err)
+		return
+	}
+
+	// Read the response
+	response, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Something is wrong with invocation response. Error:", err)
+		return
+	}
+
+	fmt.Println("Webhook invoked. Received status code " + strconv.Itoa(res.StatusCode) +
+		" and body: " + string(response))
 }
