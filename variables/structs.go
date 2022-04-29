@@ -1,5 +1,8 @@
 package consts
 
+/**
+ *	Struct for the results we got in the cases
+ */
 type Results struct {
 	Name       string  `json:"name"`
 	Date       string  `json:"date"`
@@ -9,6 +12,9 @@ type Results struct {
 	GrowthRate float64 `json:"growthRate"`
 }
 
+/**
+ *	Struct for the polict results we got in the policies
+ */
 type PolicyResults struct {
 	Date             string  `json:"date_value"`
 	CountryCode      string  `json:"country_code"`
@@ -17,16 +23,11 @@ type PolicyResults struct {
 	StringencyActual float64 `json:"stringency_actual"`
 	Stringency       float64 `json:"stringency"`
 	Policy           int     `json:"policy"`
-
-	/* 	TypeCode           string `json:"policy_type_code"`
-	   	TypeDisplay        string `json:"policy_type_display"`
-	   	FlagValue          string `json:"flag_value_display_field"`
-	   	PolicyValueDisplay string `json:"policy_value_display_field"`
-	   	PolicyValue        int    `json:"policyvalue"`
-	   	Flagged            string `json:"flagged"`
-	   	Notes              string `json:"notes" */
 }
 
+/**
+ *	Handles the webhook data in a struct
+ */
 type WebhookRegistration struct {
 	Weebhook_ID string `json:"webhook_id"`
 	Url         string `json:"url"`

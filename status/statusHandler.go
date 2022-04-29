@@ -23,6 +23,9 @@ func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ *	Handles the get request for status
+ */
 func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Instantiate the client

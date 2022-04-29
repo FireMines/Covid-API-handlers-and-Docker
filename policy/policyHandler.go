@@ -11,8 +11,8 @@ import (
 )
 
 /*
-Entry point handler for policy information
-*/
+ *	Entry point handler for policy information
+ */
 func PolicyHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -24,6 +24,9 @@ func PolicyHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+/**
+ *	Handles the get request for policy
+ */
 func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	// Country you are searching for
@@ -35,6 +38,7 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 		scope = currentTime.Format("2006-01-02")
 	}
 
+	// Gets covid tracker and country from url
 	fmt.Println(consts.COVIDTRACKER + WantCountry + "/" + scope)
 	resp, err := http.Get(consts.COVIDTRACKER + WantCountry + "/" + scope)
 	if err != nil {
@@ -43,19 +47,22 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Decoding
 	dataRaw := map[string]interface{}{}
 	err = json.NewDecoder(resp.Body).Decode(&dataRaw)
 	if err != nil {
 		http.Error(w, "Fault while decoding", http.StatusBadRequest)
-		fmt.Println("Decoding2: " + err.Error())
+		fmt.Println("Decoding: " + err.Error())
 		return
 	}
 
+	// Stores data into struct
 	cntry := storePolicyData(dataRaw["stringencyData"].(map[string]interface{}))
 	policies := dataRaw["policyActions"].([]interface{})
 
 	validPolicies := 0
 
+	// Checks if policies does not exists, if it exists, make policies counter go up
 	for _, j0 := range policies {
 		j := j0.(map[string]interface{})
 		if j["policy_type_code"].(string) != "NONE" {
@@ -67,6 +74,7 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	defer resp.Body.Close()
 
+	// Encode
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(cntry)
 	if err != nil {

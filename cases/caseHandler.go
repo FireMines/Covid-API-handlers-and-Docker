@@ -9,8 +9,8 @@ import (
 )
 
 /*
-Entry point handler for Location information
-*/
+ *	Entry point handler for Location information
+ */
 func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -22,6 +22,9 @@ func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ *	Handles the get request for cases
+ */
 func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")

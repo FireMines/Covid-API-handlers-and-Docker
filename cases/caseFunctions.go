@@ -8,6 +8,11 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+/**
+ *	Gets all the info about covid cases and stores them into a struct
+ *
+ * @return country - Struct with all info about covid cases
+ */
 func getCovidCasesPerCountry(countryName string) consts.Results {
 	var country consts.Results
 	graphqlClient := graphql.NewClient(consts.COVIDGRAPHQL)
@@ -40,6 +45,9 @@ func getCovidCasesPerCountry(countryName string) consts.Results {
 	return country
 }
 
+/**
+ *	Stores all data into a struct
+ */
 func storeData(data map[string]interface{}) consts.Results {
 	data = (data["country"].(map[string]interface{}))
 	allData := data["mostRecent"].(map[string]interface{})

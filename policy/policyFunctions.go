@@ -4,6 +4,9 @@ import (
 	consts "covidAss2/variables"
 )
 
+/**
+ *	Stores data into its respective struct
+ */
 func storePolicyData(data map[string]interface{}) consts.PolicyResults {
 	if _, ok := data["msg"]; ok {
 		return consts.PolicyResults{

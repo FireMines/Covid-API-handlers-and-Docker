@@ -18,8 +18,8 @@ var Webhooks = []consts.WebhookRegistration{}
 const collection = "webhooks"
 
 /*
-Entry point handler for Location information
-*/
+ *	Entry point handler for Location information
+ */
 func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -34,6 +34,9 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ *	Handles the post request for notifications
+ */
 func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 
@@ -69,11 +72,14 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/**
+ *	Handles the get request for notifications
+ */
 func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 
+	// Gets the url data and checks if user have entered a value
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
-	//fmt.Println(urlLastVal)
 	if urlLastVal == "notifications" {
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
@@ -81,6 +87,8 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	// Goes through all webhooks and checks if they match a stated value in the url
+	// If it matches one found, then print out its data
 	for i := range Webhooks {
 		if Webhooks[i].Weebhook_ID == urlLastVal {
 			err := json.NewEncoder(w).Encode(Webhooks[i])
@@ -89,16 +97,22 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+
 	}
+	// If none of the statements above happens, return status not found
+	http.Error(w, "No webhook with that ID exists!", http.StatusNotFound)
 
 }
 
+/**
+ *	Handles the delete request for notifications
+ */
 func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
 	fmt.Println(urlLastVal)
 	r.Header.Add("content-type", "application/json")
 	if urlLastVal == "notifications" {
-		http.Error(w, "Looks like you forgot to add a webhook_id! Place do so next time ;)", http.StatusBadRequest)
+		http.Error(w, "Looks like you forgot to add a webhook_id! Please do so next time ;)", http.StatusBadRequest)
 		return
 	}
 	for i := range Webhooks {
@@ -109,7 +123,13 @@ func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 				log.Printf("An error has occurred: %s", err)
 			}
 			Webhooks = append(Webhooks[:i], Webhooks[i+1:]...)
+			fmt.Println("Deleting webhook success", http.StatusOK)
+
 			return
 		}
 	}
+
+	// If none of the statements above happens, return status not found
+	http.Error(w, "No webhook with that ID exists!", http.StatusNotFound)
+
 }

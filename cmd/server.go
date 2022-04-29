@@ -29,6 +29,9 @@ const collection = "webhooks"
 
 // Message counter to produce some variation in content
 
+/**
+ *	Main file and function
+ */
 func main() {
 	consts.Start = time.Now()
 	consts.Ctx = context.Background()
@@ -98,6 +101,10 @@ func main() {
 		}
 	}()
 }
+
+/**
+ *	Stores data into its respective struct
+ */
 func storeData(data map[string]interface{}, doc *firestore.DocumentSnapshot) consts.WebhookRegistration {
 	return consts.WebhookRegistration{
 		Weebhook_ID: doc.Ref.ID,
