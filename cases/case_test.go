@@ -3,6 +3,7 @@ package cases_test
 import (
 	"covidAss2/cases"
 	consts "covidAss2/variables"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,6 +14,7 @@ import (
  *	Mocks any outgoing request during testing.
  */
 func TestHandlerCases(t *testing.T) {
+	cases.MongoAssFunc = func() { fmt.Println("B") }
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
 	req, err := http.NewRequest(http.MethodGet, consts.COVIDCASES, nil)

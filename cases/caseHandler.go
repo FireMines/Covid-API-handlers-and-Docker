@@ -25,11 +25,13 @@ var SignatureKey = "X-SIGNATURE"
 //var Mac hash.Hash
 var Secret []byte
 
+var MongoAssFunc = MongoAssFuncf
+
 /*
  *	Entry point handler for Location information
  */
 func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
-
+	MongoAssFunc()
 	switch r.Method {
 	case http.MethodGet:
 		covidCasesInfoGetRequest(w, r)
@@ -66,25 +68,14 @@ func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	if len(consts.CountriesCalls) == 0 {
 		consts.CountriesCalls = make(map[string]int)
-		fmt.Println("Mamma", consts.CountriesCalls[urlLastVal])
 	}
 
-	for i := range consts.CountriesCalls {
-		if i == urlLastVal {
-			consts.CountriesCalls[urlLastVal] += 1
-			fmt.Println("Hei", consts.CountriesCalls[urlLastVal])
-
-		} else {
-			consts.CountriesCalls = make(map[string]int)
-			fmt.Println("Pappa", consts.CountriesCalls[urlLastVal])
-
-		}
-	}
+	consts.CountriesCalls[urlLastVal] += 1
 
 	// Iterate through registered webhooks and invoke based on registered URL, method, and with received content
 	for i, v := range notifications.Webhooks {
 		if notifications.Webhooks[i].Country == urlLastVal { // If country searched is in the webhooks
-			if notifications.Webhooks[i].Calls == int64(consts.CountriesCalls[urlLastVal]) { // If number calls for that webhook occurs
+			if int64(consts.CountriesCalls[urlLastVal])%notifications.Webhooks[i].Calls == 0 { // If number calls for that webhook occurs
 				fmt.Println("Trigger event: Call to service endpoint with method " + http.MethodGet +
 					" and content '" + string(writeCountry) + "'.")
 				go CallUrl(v.Url, http.MethodGet, string(writeCountry))
@@ -133,4 +124,8 @@ func CallUrl(url string, method string, content string) {
 
 	fmt.Println("Webhook invoked. Received status code " + strconv.Itoa(res.StatusCode) +
 		" and body: " + string(response))
+}
+
+func MongoAssFuncf() {
+	fmt.Println("a")
 }

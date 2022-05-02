@@ -12,7 +12,7 @@ import (
  *	Tester for the HandlerCases function.
  *	Mocks any outgoing request during testing.
  */
-func TestHandlerCases(t *testing.T) {
+func TestHandlerPolicy(t *testing.T) {
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
 	req, err := http.NewRequest(http.MethodGet, consts.COVIDPOLICY, nil)

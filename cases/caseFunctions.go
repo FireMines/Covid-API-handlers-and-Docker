@@ -1,11 +1,9 @@
 package cases
 
 import (
-	"context"
+	outsideapi "covidAss2/outsideApi"
 	consts "covidAss2/variables"
 	"fmt"
-
-	"github.com/machinebox/graphql"
 )
 
 /**
@@ -15,8 +13,8 @@ import (
  */
 func getCovidCasesPerCountry(countryName string) consts.Results {
 	var country consts.Results
-	graphqlClient := graphql.NewClient(consts.COVIDGRAPHQL)
-	graphqlRequest := graphql.NewRequest(`
+
+	graphqlBody := `
 	query {
 		# by country
 		country(name:"` + countryName + `") {
@@ -30,12 +28,12 @@ func getCovidCasesPerCountry(countryName string) consts.Results {
 		  }
 		}
 	  } 
-	`)
-	var graphqlResponse map[string]interface{}
-	if err := graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse); err != nil {
-		panic(err)
-		//fmt.Println("Error in response:", err.Error())
-		//http.Error(w, "Error in response:", http.StatusInternalServerError)
+	`
+
+	graphqlResponse, err := outsideapi.GetGraphqlResponse(graphqlBody, consts.COVIDGRAPHQL)
+	if err != nil {
+		fmt.Println("Write clever error here")
+		return consts.Results{} // Return empty struct if something went wrong
 	}
 
 	fmt.Println(graphqlResponse)

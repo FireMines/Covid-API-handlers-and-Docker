@@ -1,6 +1,7 @@
 package policy
 
 import (
+	outsideapi "covidAss2/outsideApi"
 	consts "covidAss2/variables"
 	"encoding/json"
 	"fmt"
@@ -38,21 +39,9 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 		scope = currentTime.Format("2006-01-02")
 	}
 
-	// Gets covid tracker and country from url
-	fmt.Println(consts.COVIDTRACKER + WantCountry + "/" + scope)
-	resp, err := http.Get(consts.COVIDTRACKER + WantCountry + "/" + scope)
+	dataRaw, err := outsideapi.GetHttpResponse(consts.COVIDTRACKER + WantCountry + "/" + scope)
 	if err != nil {
-		http.Error(w, "Fault while getting covidtracker and country", http.StatusBadRequest)
-		fmt.Println("Decoding1: " + err.Error())
-		return
-	}
-
-	// Decoding
-	dataRaw := map[string]interface{}{}
-	err = json.NewDecoder(resp.Body).Decode(&dataRaw)
-	if err != nil {
-		http.Error(w, "Fault while decoding", http.StatusBadRequest)
-		fmt.Println("Decoding: " + err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -71,8 +60,6 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	cntry.Policy = validPolicies
 	fmt.Println(len(policies))
-
-	defer resp.Body.Close()
 
 	// Encode
 	encoder := json.NewEncoder(w)
