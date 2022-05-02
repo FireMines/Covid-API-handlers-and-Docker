@@ -3,6 +3,7 @@ package cases
 import (
 	"bytes"
 	"covidAss2/notifications"
+	consts "covidAss2/variables"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -15,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+//CountriesCalls := make(map[string]int)
 
 // Initialize signature (via init())
 var SignatureKey = "X-SIGNATURE"
@@ -61,14 +64,34 @@ func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 	w.Write(writeCountry)
 
-	// Iterate through registered webhooks and invoke based on registered URL, method, and with received content
-	for i, v := range notifications.Webhooks {
-		fmt.Println("Trigger event: Call to service endpoint with method " + http.MethodGet +
-			" and content '" + string(writeCountry) + "'.")
-		if notifications.Webhooks[i].Country == urlLastVal {
-			go CallUrl(v.Url, http.MethodGet, string(writeCountry))
+	if len(consts.CountriesCalls) == 0 {
+		consts.CountriesCalls = make(map[string]int)
+		fmt.Println("Mamma", consts.CountriesCalls[urlLastVal])
+	}
+
+	for i := range consts.CountriesCalls {
+		if i == urlLastVal {
+			consts.CountriesCalls[urlLastVal] += 1
+			fmt.Println("Hei", consts.CountriesCalls[urlLastVal])
+
+		} else {
+			consts.CountriesCalls = make(map[string]int)
+			fmt.Println("Pappa", consts.CountriesCalls[urlLastVal])
+
 		}
 	}
+
+	// Iterate through registered webhooks and invoke based on registered URL, method, and with received content
+	for i, v := range notifications.Webhooks {
+		if notifications.Webhooks[i].Country == urlLastVal { // If country searched is in the webhooks
+			if notifications.Webhooks[i].Calls == int64(consts.CountriesCalls[urlLastVal]) { // If number calls for that webhook occurs
+				fmt.Println("Trigger event: Call to service endpoint with method " + http.MethodGet +
+					" and content '" + string(writeCountry) + "'.")
+				go CallUrl(v.Url, http.MethodGet, string(writeCountry))
+			}
+		}
+	}
+	fmt.Println(consts.CountriesCalls[urlLastVal])
 
 }
 

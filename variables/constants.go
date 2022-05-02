@@ -30,3 +30,6 @@ var GenLength = 64
 // Firebase initialisation
 var Ctx context.Context
 var Client *firestore.Client
+
+// Used for counting number of calls done thus far for each country
+var CountriesCalls map[string]int

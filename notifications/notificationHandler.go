@@ -107,6 +107,7 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
  *	Handles the delete request for notifications
  */
 func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
+	// Gets the url data and checks if user have entered a value
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
 	fmt.Println(urlLastVal)
 	r.Header.Add("content-type", "application/json")
@@ -114,6 +115,9 @@ func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Looks like you forgot to add a webhook_id! Please do so next time ;)", http.StatusBadRequest)
 		return
 	}
+
+	// Goes through all webhooks and checks if they match a stated value in the url
+	// If it matches one found, then delete its data
 	for i := range Webhooks {
 		if Webhooks[i].Weebhook_ID == urlLastVal {
 			_, err := consts.Client.Collection(collection).Doc(urlLastVal).Delete(consts.Ctx)

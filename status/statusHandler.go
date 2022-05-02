@@ -42,9 +42,10 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error in response:", err.Error())
 	}
 
+	// Get time elapsed
 	t := time.Now()
 	Elapsed := t.Sub(consts.Start)
-
+	// Add all info to a map
 	statusInfo := map[string]interface{}{
 		"cases_api":  res.StatusCode,
 		"policy_api": res2.StatusCode, // Getting 400 Error, seems like this is okey(??)
