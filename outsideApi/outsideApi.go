@@ -3,7 +3,6 @@ package outsideapi
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -86,7 +85,6 @@ func ReadJSONToken(fileName string) (map[string]interface{}, error) {
 	   		return map[string]interface{}{}, err
 	   	} */
 
-	fmt.Println("filtered data:", filteredData)
 	return filteredData, nil
 }
 
@@ -98,7 +96,7 @@ func ReadJSONToken(fileName string) (map[string]interface{}, error) {
  *	@return	Error if something went wrong.
  */
 func SaveToJSONFile(filename string, graphqlResponse map[string]interface{}) error {
-	file, err := os.OpenFile(filename, os.O_APPEND, os.ModePerm)
+	file, err := os.OpenFile(filename, os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
 	}

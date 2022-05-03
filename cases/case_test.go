@@ -18,7 +18,7 @@ func TestHandlerCases(t *testing.T) {
 	// Mock outgoing functions so they return hardcoded results
 	getGraphqlResponse_original := outsideapi.GetGraphqlResponse
 	outsideapi.GetGraphqlResponse = func(graphqlBody, url string) (map[string]interface{}, error) {
-		graphqlResponseMocked, err := outsideapi.ReadJSONToken("../test.json")
+		graphqlResponseMocked, err := outsideapi.ReadJSONToken("graphqlTestData.json")
 		if err != nil {
 			return map[string]interface{}{}, err
 		}
@@ -31,7 +31,6 @@ func TestHandlerCases(t *testing.T) {
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
 	req, err := http.NewRequest(http.MethodGet, testurl, nil)
-	req.URL.Path = consts.COVIDCASES + "Norway"
 	if err != nil {
 		t.Error("Error when creating new request", err)
 	}

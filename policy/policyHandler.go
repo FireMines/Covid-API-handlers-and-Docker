@@ -71,5 +71,4 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Explicit specification of return status code --> will default to 200 if not provided.
 	http.Error(w, "", http.StatusOK)
-
 }
