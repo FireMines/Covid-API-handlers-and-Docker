@@ -6,6 +6,7 @@ LABEL stage=builder
 WORKDIR /go/src/app/cmd
 
 # Copy relevant folders into container
+COPY ./outsideApi /go/src/app/outsideApi
 COPY ./cases /go/src/app/cases
 COPY ./cmd /go/src/app/cmd
 COPY ./handler /go/src/app/handler

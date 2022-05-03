@@ -25,13 +25,10 @@ var SignatureKey = "X-SIGNATURE"
 //var Mac hash.Hash
 var Secret []byte
 
-var MongoAssFunc = MongoAssFuncf
-
 /*
  *	Entry point handler for Location information
  */
 func CovidInfoHandler(w http.ResponseWriter, r *http.Request) {
-	MongoAssFunc()
 	switch r.Method {
 	case http.MethodGet:
 		covidCasesInfoGetRequest(w, r)
@@ -78,7 +75,7 @@ func covidCasesInfoGetRequest(w http.ResponseWriter, r *http.Request) {
 			if int64(consts.CountriesCalls[urlLastVal])%notifications.Webhooks[i].Calls == 0 { // If number calls for that webhook occurs
 				fmt.Println("Trigger event: Call to service endpoint with method " + http.MethodGet +
 					" and content '" + string(writeCountry) + "'.")
-				go CallUrl(v.Url, http.MethodGet, string(writeCountry))
+				go CallUrl(v.Url, http.MethodPost, string(writeCountry))
 			}
 		}
 	}
@@ -124,8 +121,4 @@ func CallUrl(url string, method string, content string) {
 
 	fmt.Println("Webhook invoked. Received status code " + strconv.Itoa(res.StatusCode) +
 		" and body: " + string(response))
-}
-
-func MongoAssFuncf() {
-	fmt.Println("a")
 }

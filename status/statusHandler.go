@@ -37,7 +37,7 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error in response:", err.Error())
 	}
 
-	res2, err := client.Get(consts.COVIDGRAPHQL)
+	res2, err := client.Get(consts.COVIDGRAPHQLSTATUS)
 	if err != nil {
 		fmt.Println("Error in response:", err.Error())
 	}
@@ -48,7 +48,7 @@ func statusHandleGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Add all info to a map
 	statusInfo := map[string]interface{}{
 		"cases_api":  res.StatusCode,
-		"policy_api": res2.StatusCode, // Getting 400 Error, seems like this is okey(??)
+		"policy_api": res2.StatusCode,
 		"webhooks":   len(notifications.Webhooks),
 		"version":    consts.VERSIONNUMBER,
 		"uptime":     Elapsed.Seconds(),

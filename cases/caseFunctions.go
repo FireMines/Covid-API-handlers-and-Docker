@@ -36,10 +36,7 @@ func getCovidCasesPerCountry(countryName string) consts.Results {
 		return consts.Results{} // Return empty struct if something went wrong
 	}
 
-	fmt.Println(graphqlResponse)
-
 	country = storeData(graphqlResponse)
-
 	return country
 }
 

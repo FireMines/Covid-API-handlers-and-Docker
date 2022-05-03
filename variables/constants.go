@@ -12,6 +12,7 @@ const DEFAULT_PATH = "/"
 const VERSIONNUMBER = "v1"
 
 //const COLLECTION_PATH 		= "/collection"
+const COVIDGRAPHQLSTATUS = "https://covidtrackerapi.bsg.ox.ac.uk/api"
 const COVIDGRAPHQL = "https://covid19-graphql.vercel.app/"
 const COVIDTRACKER = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/actions/"
 const COVIDTRACKERCHECK = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/actions/NOR/2018-09-17"

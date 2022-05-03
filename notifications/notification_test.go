@@ -1,8 +1,10 @@
 package notifications_test
 
 import (
-	notifications "covidAss2/notifications"
+	"covidAss2/cases"
 	consts "covidAss2/variables"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -23,11 +25,19 @@ func TestHandlerNotifications(t *testing.T) {
 
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(notifications.NotificationHandler)
+	//handler := http.HandlerFunc(notifications.NotificationHandler)
 
+	cases.CovidInfoHandler(rr, req) // Notifications != cases??
+	result := rr.Result()
+	defer result.Body.Close()
+	data, err := ioutil.ReadAll(result.Body)
+	if err != nil {
+		t.Error("Error when creating new request", err)
+	}
+	fmt.Println("hei", string(data))
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(rr, req)
+	//handler.ServeHTTP(rr, req)
 
 	// Check the status code is what we expect.
 	if status := rr.Code; status != http.StatusOK {
@@ -35,7 +45,8 @@ func TestHandlerNotifications(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	expected := "[]"
+	expected := `{"name":"","date":"","confirmed":0,"recovered":0,"deaths":0,"growthRate":0}`
+	fmt.Println(rr.Body.String())
 	if rr.Body.String() != expected {
 		t.Errorf("Handler returned unexpected body: got:\n%v \nwant:\n%v", rr.Body.String(), expected)
 	}
@@ -83,7 +94,7 @@ func TestHandlerNotifications(t *testing.T) {
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(rr, req)
+	//handler.ServeHTTP(rr, req)
 
 	// Check the status code is what we expect.
 	if status := rr.Code; status != http.StatusOK {
@@ -116,7 +127,7 @@ func TestHandlerNotifications(t *testing.T) {
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
-	handler.ServeHTTP(rr, req)
+	//handler.ServeHTTP(rr, req)
 
 	// Check the status code is what we expect.
 	if status := rr.Code; status != http.StatusOK {
