@@ -15,6 +15,8 @@ import (
 // Webhook DB
 var Webhooks = []consts.WebhookRegistration{}
 
+var NotificationGetRequest = notificationGetRequestf
+
 const collection = "webhooks"
 
 /*
@@ -25,7 +27,7 @@ func NotificationHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		notificationPostRequest(w, r)
 	case http.MethodGet:
-		notificationGetRequest(w, r)
+		NotificationGetRequest(w, r)
 	case http.MethodDelete:
 		notificationDeleteRequest(w, r)
 	default:
@@ -75,7 +77,7 @@ func notificationPostRequest(w http.ResponseWriter, r *http.Request) {
 /**
  *	Handles the get request for notifications
  */
-func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
+func notificationGetRequestf(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "application/json")
 
 	// Gets the url data and checks if user have entered a value
@@ -98,9 +100,9 @@ func notificationGetRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	// If none of the statements above happens, return status not found
 	http.Error(w, "No webhook with that ID exists!", http.StatusNotFound)
-
 }
 
 /**
