@@ -18,6 +18,10 @@ In this README you'll see examples provided of how to interract with the databas
 Example for url:
 **http://http://34.159.61.135:8080/corona/v1/notifications/**
 
+**NB!**
+
+For some reason my server on google cloud just seemed to have status as restarting all the time even though i followed guides and did exactly the same as other people in the class. Hopefully this does not decrease my grade too badly considering everything else is as it should be
+
 ## Endpoint overview
 
 ### Default url: http://localhost:8080/
