@@ -14,14 +14,14 @@ After you have made sure you have all those things downloaded and setup you can 
 Start by opening a terminal in the project folder, then type : "go run .\cmd\server.go" and press enter
 When all this is done, open up _Postman_ and enter the GET, POST, PUT or DELETE endpoints of your choosing. **NB!** Remember to start the address in Postman with the default url followed by the endpoint you want.
 
-In this README you'll see examples provided of how to interract with the database via postman. The URL/ IP address for the hosted server is : 10.212.139.118
+In this README you'll see examples provided of how to interract with the database via postman. The URL/ IP address for the hosted server is : http://34.159.61.135:8080/
 Example for url:
-**http://10.212.139.118:8080/corona/v1/notifications/**
+**http://http://34.159.61.135:8080/corona/v1/notifications/**
 
 ## Endpoint overview
 
 ### Default url: http://localhost:8080/
-### Default server url: http://10.212.139.118:8080/
+### Default server url: http://34.159.61.135:8080/
 
 ### Endpoints
 
