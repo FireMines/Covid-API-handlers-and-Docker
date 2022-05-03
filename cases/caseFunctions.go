@@ -3,7 +3,6 @@ package cases
 import (
 	outsideapi "covidAss2/outsideApi"
 	consts "covidAss2/variables"
-	"fmt"
 )
 
 /**
@@ -32,7 +31,6 @@ func getCovidCasesPerCountry(countryName string) consts.Results {
 
 	graphqlResponse, err := outsideapi.GetGraphqlResponse(graphqlBody, consts.COVIDGRAPHQL)
 	if err != nil {
-		fmt.Println("Write clever error here")
 		return consts.Results{} // Return empty struct if something went wrong
 	}
 

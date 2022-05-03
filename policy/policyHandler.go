@@ -4,7 +4,6 @@ import (
 	outsideapi "covidAss2/outsideApi"
 	consts "covidAss2/variables"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"path"
 	"strings"
@@ -33,6 +32,10 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	// Country you are searching for
 	WantCountry := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20") // Gets the first output from path
 
+	if WantCountry == "policy" {
+		http.Error(w, "No country added", http.StatusUnprocessableEntity)
+		return
+	}
 	scope := r.URL.Query().Get("scope") // Gets the optional limit put on how many to output
 	if scope == "" {
 		currentTime := time.Now()
@@ -46,6 +49,10 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Stores data into struct
+	if dataRaw["stringencyData"] == nil {
+		http.Error(w, "Could not find any data for the given country and date", http.StatusInternalServerError)
+		return
+	}
 	cntry := storePolicyData(dataRaw["stringencyData"].(map[string]interface{}))
 	policies := dataRaw["policyActions"].([]interface{})
 
@@ -59,7 +66,6 @@ func policyGetRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	cntry.Policy = validPolicies
-	fmt.Println(len(policies))
 
 	// Encode
 	encoder := json.NewEncoder(w)

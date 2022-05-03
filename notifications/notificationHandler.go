@@ -111,7 +111,6 @@ func notificationGetRequestf(w http.ResponseWriter, r *http.Request) {
 func notificationDeleteRequest(w http.ResponseWriter, r *http.Request) {
 	// Gets the url data and checks if user have entered a value
 	urlLastVal := strings.ReplaceAll(path.Base(r.URL.Path), " ", "%20")
-	fmt.Println(urlLastVal)
 	r.Header.Add("content-type", "application/json")
 	if urlLastVal == "notifications" {
 		http.Error(w, "Looks like you forgot to add a webhook_id! Please do so next time ;)", http.StatusBadRequest)
